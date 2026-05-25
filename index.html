@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#cc0000">
+<title>🚨 SOS - EMERGENCY ALERT</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  :root {
+    --red: #ff0033;
+    --red-dark: #8b0000;
+    --bg: #0a0000;
+    --yellow: #ffd700;
+    --white: #ffffff;
+  }
+
+  html, body {
+    background: var(--bg);
+    color: var(--white);
+    font-family: 'JetBrains Mono', 'Courier New', monospace;
+    overflow-x: hidden;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+    user-select: none;
+  }
+
+  body {
+    animation: pulse-bg 1.5s ease-in-out infinite;
+    position: relative;
+  }
+
+  @keyframes pulse-bg {
+    0%, 100% { background: var(--bg); }
+    50% { background: #2a0000; }
+  }
+
+  .stripes {
+    height: 28px;
+    background: repeating-linear-gradient(
+      45deg,
+      var(--yellow) 0,
+      var(--yellow) 22px,
+      #000 22px,
+      #000 44px
+    );
+  }
+
+  .container {
+    padding: 20px 18px;
+    text-align: center;
+  }
+
+  .alert-title {
+    font-family: 'Anton', 'Impact', sans-serif;
+    font-size: clamp(70px, 24vw, 160px);
+    line-height: 0.9;
+    letter-spacing: 0.04em;
+    color: var(--red);
+    text-shadow: 0 0 40px rgba(255, 0, 51, 0.7);
+    margin: 14px 0 6px;
+    animation: flash-title 0.6s ease-in-out infinite;
+  }
+
+  @keyframes flash-title {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  .sub {
+    font-family: 'Anton', 'Impact', sans-serif;
+    font-size: clamp(16px, 5vw, 24px);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--white);
+    margin-bottom: 4px;
+  }
+
+  .name-line {
+    font-family: 'Anton', 'Impact', sans-serif;
+    font-size: clamp(36px, 10vw, 56px);
+    color: var(--yellow);
+    letter-spacing: 0.05em;
+    margin: 12px 0;
+    word-break: break-word;
+    line-height: 1;
+  }
+
+  .timestamp {
+    font-family: 'JetBrains Mono', 'Courier New', monospace;
+    font-size: 11px;
+    color: #ff9999;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+
+  .coords-block {
+    background: rgba(255, 0, 51, 0.12);
+    border: 2px solid var(--red);
+    padding: 14px 12px;
+    margin: 0 auto 16px;
+    max-width: 94%;
+  }
+
+  .coords-label {
+    font-size: 10px;
+    letter-spacing: 0.25em;
+    color: #ff9999;
+    margin-bottom: 8px;
+  }
+
+  .coords {
+    font-family: 'JetBrains Mono', 'Courier New', monospace;
+    font-size: clamp(15px, 4.2vw, 20px);
+    font-weight: 700;
+    color: var(--white);
+    word-break: break-all;
+  }
+
+  .map-wrap {
+    margin: 0 auto 18px;
+    max-width: 96%;
+    border: 3px solid var(--red);
+    background: #000;
+    position: relative;
+    aspect-ratio: 4 / 3;
+    max-height: 340px;
+  }
+
+  .map-wrap iframe {
+    width: 100%;
+    height: 100%;
+    border: 0;
+    display: block;
+  }
+
+  .map-badge {
+    position: absolute;
+    top: 0;
+    left: 0;
+    background: var(--red);
+    color: var(--white);
+    font-family: 'Anton', sans-serif;
+    font-size: 12px;
+    letter-spacing: 0.2em;
+    padding: 6px 12px;
+    z-index: 2;
+    pointer-events: none;
+  }
+
+  .btn {
+    display: block;
+    width: calc(100% - 32px);
+    max-width: 480px;
+    margin: 12px auto;
+    padding: 22px 14px;
+    font-family: 'Anton', 'Impact', sans-serif;
+    font-size: clamp(20px, 5.5vw, 26px);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    text-decoration: none;
+    text-align: center;
+    border: 3px solid var(--white);
+    background: var(--red);
+    color: var(--white);
+    cursor: pointer;
+    transition: transform 0.1s;
+  }
+
+  .btn:active { transform: scale(0.97); }
+
+  .btn.call {
+    background: var(--white);
+    color: var(--red);
+    border-color: var(--white);
+  }
+
+  .btn-silence {
+    background: transparent;
+    color: #888;
+    border-color: #444;
+    font-size: 13px;
+    padding: 12px;
+    margin-top: 24px;
+    border-width: 1px;
+    text-transform: lowercase;
+    letter-spacing: 0.2em;
+  }
+
+  .activate-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.95);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 40px;
+    text-align: center;
+  }
+
+  .activate-overlay.hidden { display: none; }
+
+  .activate-text {
+    font-family: 'Anton', 'Impact', sans-serif;
+    font-size: clamp(28px, 8vw, 44px);
+    color: var(--red);
+    margin-bottom: 30px;
+    letter-spacing: 0.15em;
+    animation: flash-title 0.6s ease-in-out infinite;
+  }
+
+  .activate-btn {
+    background: var(--red);
+    color: var(--white);
+    border: 4px solid var(--white);
+    font-family: 'Anton', 'Impact', sans-serif;
+    font-size: clamp(36px, 10vw, 56px);
+    padding: 40px 60px;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    animation: pulse-btn 0.9s ease-in-out infinite;
+  }
+
+  @keyframes pulse-btn {
+    0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 0, 51, 0.7); }
+    50% { transform: scale(1.04); box-shadow: 0 0 0 30px rgba(255, 0, 51, 0); }
+  }
+
+  .activate-sub {
+    color: var(--white);
+    font-size: 13px;
+    margin-top: 28px;
+    max-width: 320px;
+    line-height: 1.6;
+    letter-spacing: 0.05em;
+  }
+
+  .info-row {
+    font-size: 10px;
+    color: #555;
+    margin-top: 24px;
+    padding: 0 20px;
+    letter-spacing: 0.2em;
+  }
+</style>
+</head>
+<body>
+
+<div class="activate-overlay" id="activateOverlay">
+  <div class="activate-text">🚨 SOS ALERT 🚨</div>
+  <button class="activate-btn" id="activateBtn">ACTIVATE</button>
+  <div class="activate-sub">Tap to sound siren and view emergency details</div>
+</div>
+
+<audio id="sirenAudio" src="siren.mp3" loop preload="auto" playsinline></audio>
+
+<div class="stripes"></div>
+
+<div class="container">
+  <div class="sub">⚠ Emergency Alert ⚠</div>
+  <div class="alert-title">SOS</div>
+  <div class="sub">Help Requested By</div>
+  <div class="name-line" id="senderName">—</div>
+  <div class="timestamp" id="timestamp">REPORTED: —</div>
+
+  <div class="coords-block">
+    <div class="coords-label">📍 LAST KNOWN LOCATION</div>
+    <div class="coords" id="coords">—</div>
+  </div>
+
+  <div class="map-wrap" id="mapWrap">
+    <div class="map-badge">📍 LIVE LOCATION</div>
+    <iframe id="mapFrame" referrerpolicy="no-referrer-when-downgrade" loading="lazy"></iframe>
+  </div>
+
+  <a class="btn" id="mapBtn" href="#" target="_blank" rel="noopener">📍 Open in Maps App</a>
+  <a class="btn call" id="callBtn" href="#">📞 Call Now</a>
+
+  <button class="btn-silence" id="silenceBtn">silence siren</button>
+
+  <div class="info-row">SOS GPS EMERGENCY SYSTEM</div>
+</div>
+
+<div class="stripes"></div>
+
+<script>
+  const params = new URLSearchParams(location.search);
+  const lat = params.get('lat');
+  const lng = params.get('lng');
+  const name = params.get('n') || 'Unknown';
+  const phone = params.get('p') || '';
+  const ts = params.get('t');
+
+  document.getElementById('senderName').textContent = decodeURIComponent(name);
+
+  if (lat && lng) {
+    document.getElementById('coords').textContent = `${parseFloat(lat).toFixed(5)}°, ${parseFloat(lng).toFixed(5)}°`;
+
+    // Embedded map - no API key needed
+    document.getElementById('mapFrame').src =
+      `https://maps.google.com/maps?q=${lat},${lng}&z=16&output=embed`;
+
+    // Deep link - https URL auto-opens Google Maps app on Android (if installed/default)
+    // and on iOS (if installed). Falls back to web Maps if app not present.
+    document.getElementById('mapBtn').href = `https://maps.google.com/?q=${lat},${lng}`;
+  } else {
+    document.getElementById('coords').textContent = 'NO LOCATION DATA';
+    document.getElementById('mapBtn').style.display = 'none';
+    document.getElementById('mapWrap').style.display = 'none';
+  }
+
+  if (phone) {
+    document.getElementById('callBtn').href = `tel:${phone}`;
+  } else {
+    document.getElementById('callBtn').style.display = 'none';
+  }
+
+  function fmtTime() {
+    if (ts) {
+      const d = new Date(parseInt(ts) * 1000);
+      const diff = Math.floor((Date.now() - d.getTime()) / 60000);
+      const timeStr = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      const ago = diff < 1 ? 'just now' : diff < 60 ? `${diff} min ago` : `${Math.floor(diff/60)}h ${diff%60}m ago`;
+      return `REPORTED: ${timeStr} · ${ago}`;
+    }
+    return 'REPORTED: NOW';
+  }
+  document.getElementById('timestamp').textContent = fmtTime();
+  setInterval(() => { document.getElementById('timestamp').textContent = fmtTime(); }, 30000);
+
+  let audioCtx, oscillator, gainNode, sirenInterval, vibrateInterval;
+  let sirenOn = false;
+  const sirenAudio = document.getElementById('sirenAudio');
+
+  function startSiren() {
+    if (sirenOn) return;
+
+    // PRIMARY: HTML5 Audio with MP3 file — most reliable across devices
+    sirenAudio.volume = 1.0;
+    sirenAudio.currentTime = 0;
+    const playPromise = sirenAudio.play();
+
+    if (playPromise !== undefined) {
+      playPromise.then(() => {
+        sirenOn = true;
+      }).catch((err) => {
+        console.warn('MP3 siren blocked, falling back to Web Audio:', err);
+        startWebAudioSiren();
+      });
+    } else {
+      sirenOn = true;
+    }
+  }
+
+  function startWebAudioSiren() {
+    // FALLBACK: synthesized siren via Web Audio API
+    try {
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      oscillator = audioCtx.createOscillator();
+      gainNode = audioCtx.createGain();
+      oscillator.type = 'sawtooth';
+      oscillator.connect(gainNode);
+      gainNode.connect(audioCtx.destination);
+      gainNode.gain.value = 0.4;
+      oscillator.frequency.value = 900;
+      oscillator.start();
+
+      let high = true;
+      sirenInterval = setInterval(() => {
+        if (oscillator && audioCtx) {
+          oscillator.frequency.setValueAtTime(high ? 1500 : 750, audioCtx.currentTime);
+          high = !high;
+        }
+      }, 500);
+
+      sirenOn = true;
+    } catch (e) {
+      console.warn('Web Audio fallback also failed:', e);
+    }
+  }
+
+  function stopSiren() {
+    // Stop MP3 audio
+    try { sirenAudio.pause(); sirenAudio.currentTime = 0; } catch (e) {}
+
+    // Stop Web Audio if it was used as fallback
+    if (sirenInterval) clearInterval(sirenInterval);
+    if (oscillator) { try { oscillator.stop(); } catch (e) {} }
+    if (audioCtx) { try { audioCtx.close(); } catch (e) {} }
+    audioCtx = null; oscillator = null;
+
+    sirenOn = false;
+
+    if (vibrateInterval) clearInterval(vibrateInterval);
+    if (navigator.vibrate) navigator.vibrate(0);
+
+    const btn = document.getElementById('silenceBtn');
+    btn.textContent = 'siren silenced';
+    btn.disabled = true;
+  }
+
+  function startVibrate() {
+    if (!navigator.vibrate) return;
+    const pattern = [500, 200, 500, 200, 500, 200, 800];
+    navigator.vibrate(pattern);
+    vibrateInterval = setInterval(() => {
+      navigator.vibrate(pattern);
+    }, 3000);
+  }
+
+  function activate() {
+    document.getElementById('activateOverlay').classList.add('hidden');
+    startSiren();
+    startVibrate();
+  }
+
+  document.getElementById('activateBtn').addEventListener('click', activate);
+  document.getElementById('silenceBtn').addEventListener('click', stopSiren);
+
+  // Auto-activate on any first touch anywhere on the page
+  document.body.addEventListener('touchstart', function once() {
+    if (!sirenOn) activate();
+    document.body.removeEventListener('touchstart', once);
+  }, { once: true });
+</script>
+
+</body>
+</html>

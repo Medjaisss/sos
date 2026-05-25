@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#cc0000">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="SOS">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" type="image/png" href="icon-192.png">
+<title>SOS Alert</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  :root {
+    --red: #ff0033;
+    --red-dark: #8b0000;
+    --bg: #0a0000;
+    --yellow: #ffd700;
+    --white: #ffffff;
+    --gray: #888;
+    --dim: #2a1010;
+  }
+
+  html, body {
+    background: var(--bg);
+    color: var(--white);
+    font-family: 'JetBrains Mono', 'Courier New', monospace;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+
+  body { padding: env(safe-area-inset-top) 0 env(safe-area-inset-bottom); }
+
+  .stripes {
+    height: 16px;
+    background: repeating-linear-gradient(45deg, var(--yellow) 0, var(--yellow) 14px, #000 14px, #000 28px);
+  }
+
+  .screen { padding: 20px; min-height: 100vh; }
+  .hidden { display: none !important; }
+
+  /* ---------- SETUP SCREEN ---------- */
+  .setup-title {
+    font-family: 'Anton', 'Impact', sans-serif;
+    font-size: 38px;
+    letter-spacing: 0.05em;
+    color: var(--red);
+    text-align: center;
+    margin: 12px 0 4px;
+  }
+
+  .setup-sub {
+    text-align: center;
+    color: var(--gray);
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    margin-bottom: 24px;
+    text-transform: uppercase;
+  }
+
+  .privacy-note {
+    background: rgba(255, 215, 0, 0.08);
+    border-left: 3px solid var(--yellow);
+    padding: 12px 14px;
+    margin-bottom: 24px;
+    font-size: 12px;
+    color: #ddd;
+    line-height: 1.6;
+  }
+
+  .privacy-note strong { color: var(--yellow); }
+
+  .section-label {
+    font-family: 'Anton', sans-serif;
+    font-size: 18px;
+    letter-spacing: 0.15em;
+    color: var(--white);
+    text-transform: uppercase;
+    margin: 24px 0 12px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid #333;
+  }
+
+  label {
+    display: block;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--gray);
+    margin-bottom: 6px;
+    margin-top: 12px;
+  }
+
+  input[type="text"], input[type="tel"] {
+    width: 100%;
+    padding: 14px;
+    background: var(--dim);
+    border: 1px solid #444;
+    color: var(--white);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 16px;
+    border-radius: 0;
+    -webkit-appearance: none;
+  }
+
+  input:focus { outline: 2px solid var(--red); border-color: var(--red); }
+
+  .add-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr auto;
+    gap: 8px;
+    margin-top: 12px;
+  }
+
+  .add-row input { margin: 0; }
+
+  .add-btn {
+    background: var(--red);
+    color: var(--white);
+    border: none;
+    font-family: 'Anton', sans-serif;
+    font-size: 18px;
+    padding: 0 16px;
+    cursor: pointer;
+    letter-spacing: 0.05em;
+  }
+
+  .contact-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--dim);
+    padding: 12px 14px;
+    margin-bottom: 6px;
+    border-left: 3px solid var(--red);
+  }
+
+  .contact-info { flex: 1; min-width: 0; }
+  .contact-name {
+    font-family: 'Anton', sans-serif;
+    font-size: 18px;
+    letter-spacing: 0.05em;
+    color: var(--white);
+  }
+  .contact-phone { font-size: 12px; color: var(--gray); margin-top: 2px; }
+
+  .remove-btn {
+    background: transparent;
+    border: 1px solid #555;
+    color: #aaa;
+    width: 36px;
+    height: 36px;
+    font-size: 20px;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+
+  .empty-state {
+    text-align: center;
+    color: #555;
+    font-size: 13px;
+    padding: 20px;
+    border: 1px dashed #333;
+    margin-top: 8px;
+  }
+
+  .save-btn {
+    width: 100%;
+    background: var(--red);
+    color: var(--white);
+    border: 3px solid var(--white);
+    font-family: 'Anton', sans-serif;
+    font-size: 26px;
+    padding: 22px;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    margin-top: 32px;
+    text-transform: uppercase;
+  }
+
+  .save-btn:active { transform: scale(0.98); }
+
+  .backup-row {
+    display: flex;
+    gap: 8px;
+    margin-top: 16px;
+  }
+
+  .backup-btn {
+    flex: 1;
+    background: transparent;
+    color: var(--gray);
+    border: 1px solid #444;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    padding: 12px;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    text-transform: uppercase;
+  }
+
+  /* ---------- MAIN SOS SCREEN ---------- */
+  .main-wrap {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 0;
+  }
+
+  .main-header {
+    text-align: center;
+    padding: 20px;
+  }
+
+  .main-title {
+    font-family: 'Anton', sans-serif;
+    font-size: 22px;
+    letter-spacing: 0.25em;
+    color: var(--gray);
+    text-transform: uppercase;
+  }
+
+  .sos-button-wrap {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+
+  .sos-btn {
+    width: 280px;
+    height: 280px;
+    max-width: 80vw;
+    max-height: 80vw;
+    border-radius: 50%;
+    background: var(--red);
+    border: 6px solid var(--white);
+    color: var(--white);
+    font-family: 'Anton', sans-serif;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 0 0 rgba(255, 0, 51, 0.7), 0 20px 60px rgba(255, 0, 51, 0.3);
+    animation: pulse-sos 2s ease-in-out infinite;
+    transition: transform 0.1s;
+  }
+
+  @keyframes pulse-sos {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(255, 0, 51, 0.6), 0 20px 60px rgba(255, 0, 51, 0.3); }
+    50% { box-shadow: 0 0 0 30px rgba(255, 0, 51, 0), 0 20px 60px rgba(255, 0, 51, 0.5); }
+  }
+
+  .sos-btn:active { transform: scale(0.95); }
+  .sos-btn:disabled { opacity: 0.6; animation: none; }
+
+  .sos-emoji { font-size: 48px; line-height: 1; margin-bottom: 4px; }
+  .sos-label {
+    font-size: 52px;
+    letter-spacing: 0.08em;
+    line-height: 0.9;
+  }
+  .sos-sub {
+    font-size: 12px;
+    letter-spacing: 0.2em;
+    color: rgba(255,255,255,0.85);
+    margin-top: 10px;
+    text-transform: uppercase;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+  }
+
+  .status-bar {
+    text-align: center;
+    padding: 12px 20px;
+    min-height: 40px;
+    color: var(--yellow);
+    font-size: 13px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .main-footer {
+    padding: 0 20px 28px;
+    text-align: center;
+  }
+
+  .circle-info {
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    color: var(--gray);
+    text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+
+  .edit-link {
+    background: transparent;
+    color: var(--gray);
+    border: 1px solid #333;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    padding: 10px 24px;
+    letter-spacing: 0.2em;
+    cursor: pointer;
+    text-transform: uppercase;
+  }
+
+  .install-hint {
+    background: rgba(255, 215, 0, 0.08);
+    border: 1px solid rgba(255, 215, 0, 0.3);
+    margin: 0 20px 16px;
+    padding: 12px;
+    font-size: 11px;
+    color: var(--yellow);
+    text-align: center;
+    letter-spacing: 0.05em;
+    line-height: 1.5;
+  }
+
+  .install-hint.hidden { display: none; }
+  .install-hint button {
+    background: transparent;
+    border: none;
+    color: var(--gray);
+    font-size: 14px;
+    cursor: pointer;
+    margin-left: 8px;
+  }
+</style>
+</head>
+<body>
+
+<!-- ============= SETUP SCREEN ============= -->
+<div id="setupScreen" class="screen hidden">
+  <div class="setup-title">SOS Setup</div>
+  <div class="setup-sub">— Emergency Circle Configuration —</div>
+
+  <div class="privacy-note">
+    <strong>🔒 Privacy:</strong> Your contacts are stored only on this phone, in your browser's local memory.
+    Nothing is uploaded. Nothing is online. If you clear browser data, use Export Backup to save a copy first.
+  </div>
+
+  <div class="section-label">Your Identity</div>
+  <label>Your Name (shown to recipients)</label>
+  <input id="ownName" type="text" placeholder="e.g., Sabya" autocomplete="off">
+  <label>Your Phone (for callbacks)</label>
+  <input id="ownPhone" type="tel" placeholder="91XXXXXXXXXX (country code, no +)" autocomplete="off">
+
+  <div class="section-label">Emergency Circle</div>
+
+  <div id="contactsList"></div>
+  <div id="emptyState" class="empty-state">No contacts yet. Add at least one below.</div>
+
+  <div class="add-row">
+    <input id="newName" type="text" placeholder="Name" autocomplete="off">
+    <input id="newPhone" type="tel" placeholder="Phone" autocomplete="off">
+    <button class="add-btn" id="addBtn">+</button>
+  </div>
+
+  <button class="save-btn" id="saveBtn">Save & Continue</button>
+
+  <div class="backup-row">
+    <button class="backup-btn" id="exportBtn">↓ Export Backup</button>
+    <button class="backup-btn" id="importBtn">↑ Import Backup</button>
+    <input type="file" id="importFile" accept=".json" style="display:none">
+  </div>
+</div>
+
+<!-- ============= MAIN SCREEN ============= -->
+<div id="mainScreen" class="hidden">
+  <div class="stripes"></div>
+
+  <div class="main-wrap">
+    <div class="main-header">
+      <div class="main-title">⚠ SOS ALERT ⚠</div>
+    </div>
+
+    <div id="installHint" class="install-hint hidden">
+      Add to Home Screen for one-tap access · iOS: Share → Add to Home Screen · Android: ⋮ → Install app
+      <button id="dismissHint">×</button>
+    </div>
+
+    <div class="sos-button-wrap">
+      <button class="sos-btn" id="sosBtn">
+        <div class="sos-emoji">🚨</div>
+        <div class="sos-label">SOS</div>
+        <div class="sos-sub">Tap to send</div>
+      </button>
+    </div>
+
+    <div class="status-bar" id="status">Ready · GPS will activate on tap</div>
+
+    <div class="main-footer">
+      <div class="circle-info">Sends to <span id="contactCount">0</span> emergency contacts</div>
+      <button class="edit-link" id="editBtn">Edit Circle</button>
+    </div>
+  </div>
+
+  <div class="stripes"></div>
+</div>
+
+<script>
+  const STORAGE_KEY = 'sos_config_v1';
+  const VIEWER_URL = location.origin + location.pathname.replace(/send\.html$/, '');
+
+  let contacts = [];
+  let ownName = '';
+  let ownPhone = '';
+
+  // ---------- Storage ----------
+  function loadConfig() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return null;
+      return JSON.parse(raw);
+    } catch (e) { return null; }
+  }
+
+  function saveConfig() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ ownName, ownPhone, contacts }));
+  }
+
+  // ---------- Navigation ----------
+  function showSetup() {
+    document.getElementById('setupScreen').classList.remove('hidden');
+    document.getElementById('mainScreen').classList.add('hidden');
+    document.getElementById('ownName').value = ownName;
+    document.getElementById('ownPhone').value = ownPhone;
+    renderContacts();
+  }
+
+  function showMain() {
+    document.getElementById('setupScreen').classList.add('hidden');
+    document.getElementById('mainScreen').classList.remove('hidden');
+    document.getElementById('contactCount').textContent = contacts.length;
+    maybeShowInstallHint();
+  }
+
+  function maybeShowInstallHint() {
+    // Show install hint if not running as PWA and not dismissed before
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches
+                      || window.navigator.standalone === true;
+    const dismissed = localStorage.getItem('install_hint_dismissed') === '1';
+    if (!isStandalone && !dismissed) {
+      document.getElementById('installHint').classList.remove('hidden');
+    }
+  }
+
+  // ---------- Contacts UI ----------
+  function renderContacts() {
+    const list = document.getElementById('contactsList');
+    const empty = document.getElementById('emptyState');
+    list.innerHTML = '';
+    if (contacts.length === 0) {
+      empty.classList.remove('hidden');
+      return;
+    }
+    empty.classList.add('hidden');
+    contacts.forEach((c, i) => {
+      const div = document.createElement('div');
+      div.className = 'contact-row';
+      div.innerHTML = `
+        <div class="contact-info">
+          <div class="contact-name"></div>
+          <div class="contact-phone"></div>
+        </div>
+        <button class="remove-btn" data-i="${i}">×</button>
+      `;
+      div.querySelector('.contact-name').textContent = c.name;
+      div.querySelector('.contact-phone').textContent = '+' + c.phone;
+      list.appendChild(div);
+    });
+    list.querySelectorAll('.remove-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const i = parseInt(btn.dataset.i);
+        contacts.splice(i, 1);
+        renderContacts();
+      });
+    });
+  }
+
+  function addContact() {
+    const nameEl = document.getElementById('newName');
+    const phoneEl = document.getElementById('newPhone');
+    const name = nameEl.value.trim();
+    const phone = phoneEl.value.trim().replace(/[^0-9]/g, '');
+    if (!name) { alert('Enter a name'); nameEl.focus(); return; }
+    if (!phone || phone.length < 10) { alert('Enter valid phone with country code (digits only)'); phoneEl.focus(); return; }
+    contacts.push({ name, phone });
+    nameEl.value = '';
+    phoneEl.value = '';
+    renderContacts();
+    nameEl.focus();
+  }
+
+  function saveSetup() {
+    ownName = document.getElementById('ownName').value.trim();
+    ownPhone = document.getElementById('ownPhone').value.trim().replace(/[^0-9]/g, '');
+    if (!ownName) { alert('Enter your name'); return; }
+    if (!ownPhone || ownPhone.length < 10) { alert('Enter your phone with country code (digits only)'); return; }
+    if (contacts.length === 0) { alert('Add at least one emergency contact'); return; }
+    saveConfig();
+    showMain();
+  }
+
+  // ---------- Backup ----------
+  function exportBackup() {
+    const data = JSON.stringify({ ownName, ownPhone, contacts, exportedAt: new Date().toISOString() }, null, 2);
+    const blob = new Blob([data], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'sos-circle-' + new Date().toISOString().slice(0,10) + '.json';
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 100);
+  }
+
+  function importBackup(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const data = JSON.parse(e.target.result);
+        if (!data.contacts || !Array.isArray(data.contacts)) throw new Error('Invalid format');
+        contacts = data.contacts;
+        ownName = data.ownName || '';
+        ownPhone = data.ownPhone || '';
+        saveConfig();
+        showSetup();
+        alert('Backup imported · ' + contacts.length + ' contacts loaded');
+      } catch (err) {
+        alert('Invalid backup file');
+      }
+    };
+    reader.readAsText(file);
+    event.target.value = '';
+  }
+
+  // ---------- SOS firing ----------
+  function setStatus(msg, isError) {
+    const el = document.getElementById('status');
+    el.textContent = msg;
+    el.style.color = isError ? '#ff6666' : 'var(--yellow)';
+  }
+
+  async function fireSOS() {
+    const btn = document.getElementById('sosBtn');
+    btn.disabled = true;
+
+    if (navigator.vibrate) navigator.vibrate([200, 80, 200, 80, 400]);
+    setStatus('Acquiring GPS...');
+
+    let lat, lng;
+    try {
+      const pos = await new Promise((resolve, reject) => {
+        if (!navigator.geolocation) return reject(new Error('No geolocation'));
+        navigator.geolocation.getCurrentPosition(resolve, reject, {
+          enableHighAccuracy: true, timeout: 12000, maximumAge: 20000
+        });
+      });
+      lat = pos.coords.latitude.toFixed(5);
+      lng = pos.coords.longitude.toFixed(5);
+      setStatus('GPS locked · Opening SMS...');
+    } catch (e) {
+      setStatus('GPS failed · Sending without location', true);
+    }
+
+    const t = Math.floor(Date.now() / 1000);
+    let viewerUrl = VIEWER_URL + '?n=' + encodeURIComponent(ownName) + '&p=' + ownPhone + '&t=' + t;
+    if (lat && lng) viewerUrl += '&lat=' + lat + '&lng=' + lng;
+
+    const body = '🚨🚨 SOS - I need urgent help. Tap NOW: ' + viewerUrl;
+    const numbers = contacts.map(c => c.phone).join(',');
+    const smsUri = 'sms:' + numbers + '?body=' + encodeURIComponent(body);
+
+    // Try opening SMS app
+    window.location.href = smsUri;
+
+    setTimeout(() => {
+      btn.disabled = false;
+      setStatus('SMS opened · Tap SEND in messages app');
+    }, 2500);
+  }
+
+  // ---------- Init ----------
+  function init() {
+    const cfg = loadConfig();
+    if (cfg && Array.isArray(cfg.contacts) && cfg.contacts.length > 0) {
+      contacts = cfg.contacts;
+      ownName = cfg.ownName || '';
+      ownPhone = cfg.ownPhone || '';
+      showMain();
+    } else {
+      showSetup();
+    }
+
+    document.getElementById('addBtn').addEventListener('click', addContact);
+    document.getElementById('saveBtn').addEventListener('click', saveSetup);
+    document.getElementById('exportBtn').addEventListener('click', exportBackup);
+    document.getElementById('importBtn').addEventListener('click', () => document.getElementById('importFile').click());
+    document.getElementById('importFile').addEventListener('change', importBackup);
+    document.getElementById('editBtn').addEventListener('click', showSetup);
+    document.getElementById('sosBtn').addEventListener('click', fireSOS);
+    document.getElementById('dismissHint').addEventListener('click', () => {
+      localStorage.setItem('install_hint_dismissed', '1');
+      document.getElementById('installHint').classList.add('hidden');
+    });
+
+    // Allow Enter key in add row
+    document.getElementById('newPhone').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') { e.preventDefault(); addContact(); }
+    });
+  }
+
+  init();
+</script>
+
+</body>
+</html>
